@@ -1,0 +1,13 @@
+# lisp junk
+*.FASL
+*.fasl
+*.lisp-temp
+
+# emacs junk
+\#*
+*~
+.\#*
+
+# Agentic metadata (symlinked from render-stack-meta)
+AGENTS.md
+.beads/
