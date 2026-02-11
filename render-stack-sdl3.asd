@@ -4,21 +4,24 @@
   :author "Joel Boehland"
   :license "MIT"
   :depends-on (:render-stack-sdl3-ffi
+               :render-stack-internals
+               :render-stack-host
                :alexandria
                :bordeaux-threads
-               :trivial-main-thread
-               :log4cl)
+               :float-features)
   :components ((:module "src"
                 :components ((:file "package")
                              (:file "conditions" :depends-on ("package"))
                              (:file "events" :depends-on ("conditions"))
                              (:file "event-handlers" :depends-on ("events"))
-                             (:file "main-thread" :depends-on ("package")))))
+                             (:file "main-thread" :depends-on ("conditions" "events" "event-handlers"))
+                             (:file "host" :depends-on ("main-thread")))))
   :in-order-to ((test-op (test-op "render-stack-sdl3/tests"))))
 
 (asdf:defsystem :render-stack-sdl3/tests
   :depends-on (:render-stack-sdl3
-               :fiveam)
+               :fiveam
+               :closer-mop)
   :components ((:module "test"
                 :components ((:file "package")
                              (:file "sdl3-tests" :depends-on ("package")))))

@@ -1,34 +1,82 @@
-(defpackage :render-stack-sdl3
+;;;; render-stack-sdl3/package.lisp
+;;;; Dual-package pattern: internal protocol + public API
+
+(defpackage :%render-stack-sdl3
   (:use :cl)
-  (:nicknames :rs-sdl3)
   (:export
-   ;; Initialization
-   #:init-sdl3
+   ;; SDL3 initialization
+   #:sdl3-initialized-p
+   #:init-sdl3-video
    #:quit-sdl3
-   #:with-sdl3
-   
-   ;; Events
+   ;; Executor control
+   #:main-thread-executor-loop
+   #:stop-executor))
+
+(defpackage :render-stack-sdl3
+  (:use :cl :%render-stack-sdl3)
+  (:nicknames :rs-sdl3)
+  (:local-nicknames (:a :alexandria)
+                    (:bt :bordeaux-threads)
+                    (:log :org.shirakumo.verbose)
+                    (:rs-internals :render-stack-internals)
+                    (:rs-host :render-stack-host)
+                    (:sdl3-ffi :%sdl3))
+  (:documentation
+   "Lispy wrapper around SDL3 windowing and input FFI.
+    Provides idiomatic Common Lisp interfaces for window creation,
+    event handling, and input management.")
+  (:export
+   ;; Event polling
    #:with-sdl3-event
    #:poll-event
    #:poll-all-events
    #:get-event-type
    #:event-type-category
-   
-   ;; Event accessors
+   ;; Keyboard event accessors
    #:keyboard-event-window-id
    #:keyboard-event-scancode
    #:keyboard-event-keycode
    #:keyboard-event-mod
+   #:keyboard-event-down-p
+   #:keyboard-event-repeat-p
+   ;; Mouse button event accessors
    #:mouse-button-event-window-id
    #:mouse-button-event-button
+   #:mouse-button-event-down-p
+   #:mouse-button-event-clicks
    #:mouse-button-event-x
    #:mouse-button-event-y
+   ;; Mouse motion event accessors
+   #:mouse-motion-event-window-id
+   #:mouse-motion-event-x
+   #:mouse-motion-event-y
+   #:mouse-motion-event-state
+   ;; Mouse wheel event accessors
+   #:mouse-wheel-event-window-id
+   #:mouse-wheel-event-x
+   #:mouse-wheel-event-y
+   #:mouse-wheel-event-direction
+   ;; Window event accessors
    #:window-event-window-id
    #:window-event-data1
    #:window-event-data2
-   
-   ;; Main thread
-   #:ensure-main-thread
-   #:call-in-main-thread
-   #:with-main-thread
-   #:main-thread-executor-loop))
+   ;; Event handler dispatch
+   #:handle-sdl3-event
+   #:dispatch-event
+   #:process-events
+   ;; Main thread support (SDL3 specific)
+   #:sdl3-initialized-p
+   #:init-sdl3-video
+   #:quit-sdl3
+   #:main-thread-executor-loop
+   #:stop-executor
+   #:with-main-thread-executor
+   ;; Conditions
+   #:sdl3-error
+   #:sdl3-error-message
+   #:sdl3-initialization-error
+   #:sdl3-main-thread-error
+   ;; Host protocol classes
+   #:sdl3-host
+   #:sdl3-window
+   #:sdl3-display))
