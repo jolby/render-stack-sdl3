@@ -283,3 +283,37 @@
    (cffi:foreign-slot-pointer event-ptr '(:union %sdl3::event) '%sdl3::wheel)
    '(:struct %sdl3::mouse-wheel-event)
    '%sdl3::direction))
+
+;;; Wait Event Timeout
+;;; Uses OS-level blocking (epoll/kqueue), not busy-waiting
+
+(defun wait-event-timeout (timeout-ms)
+  "Wait for an SDL3 event with timeout, returning T if an event arrived.
+
+   Arguments:
+     timeout-ms - Timeout in milliseconds. -1 means wait forever,
+                  0 means return immediately (non-blocking).
+
+   Returns:
+     T if an event is available (call poll-event to retrieve it),
+     NIL if timeout expired.
+
+   Note: Uses OS-level blocking via SDL_WaitEventTimeout, not busy-waiting.
+   This is the recommended way to wait for events when not polling in a loop."
+  (declare (type (signed-integer 32) timeout-ms))
+  (with-sdl3-event (ev)
+    (%sdl3::wait-event-timeout ev timeout-ms)))
+
+(defun wait-event (event-ptr)
+  "Wait indefinitely for an SDL3 event.
+
+   Arguments:
+     event-ptr - CFFI pointer to pre-allocated event storage
+
+   Returns:
+     T if an event was retrieved, NIL on error.
+
+   Note: Blocks the calling thread until an event arrives. Use only
+   when no other work needs to be done while waiting."
+  (declare (type cffi:foreign-pointer event-ptr))
+  (%sdl3::wait-event event-ptr))

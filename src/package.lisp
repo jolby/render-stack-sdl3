@@ -32,6 +32,9 @@
    #:poll-all-events
    #:get-event-type
    #:event-type-category
+   ;; Wait event
+   #:wait-event
+   #:wait-event-timeout
    ;; Keyboard event accessors
    #:keyboard-event-window-id
    #:keyboard-event-scancode
