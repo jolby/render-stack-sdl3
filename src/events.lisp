@@ -300,7 +300,7 @@
 
    Note: Uses OS-level blocking via SDL_WaitEventTimeout, not busy-waiting.
    This is the recommended way to wait for events when not polling in a loop."
-  (declare (type (signed-integer 32) timeout-ms))
+  (declare (type (signed-byte 32) timeout-ms))
   (with-sdl3-event (ev)
     (%sdl3::wait-event-timeout ev timeout-ms)))
 
