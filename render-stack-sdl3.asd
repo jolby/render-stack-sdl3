@@ -8,6 +8,7 @@
                :render-stack-host
                :alexandria
                :bordeaux-threads
+               :bordeaux-threads-2
                :float-features)
   :components ((:module "src"
                 :components ((:file "package")
@@ -15,7 +16,13 @@
                              (:file "events" :depends-on ("conditions"))
                              (:file "event-handlers" :depends-on ("events"))
                              (:file "main-thread" :depends-on ("conditions" "events" "event-handlers"))
-                             (:file "host" :depends-on ("main-thread")))))
+                             (:file "host" :depends-on ("main-thread"))
+                             (:module "phases"
+                              :depends-on ("package" "events" "event-handlers")
+                              :components ((:file "sdl-event-phase")
+                                           (:file "render-phase")
+                                           (:file "yield-phase")))
+                             (:file "main-thread-ops" :depends-on ("phases" "host")))))
   :in-order-to ((test-op (test-op "render-stack-sdl3/tests"))))
 
 (asdf:defsystem :render-stack-sdl3/tests

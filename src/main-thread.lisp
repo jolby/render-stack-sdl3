@@ -17,6 +17,16 @@
   "Check if SDL3 has been initialized."
   *sdl3-initialized*)
 
+;;;; Load SDL3 native libraries
+(cffi:define-foreign-library
+    (sdl3-clawed
+     :search-path (asdf:system-relative-pathname :render-stack-sdl3-ffi
+                                                 "src/lib/build/desktop/"))
+  (:unix "libsdl3.clawed.so"))
+
+(defun %ensure-sdl-native-libs-loaded ()
+  (cffi:load-foreign-library 'sdl3-clawed))
+
 (defun init-sdl3-video ()
   "Initialize SDL3 video subsystem.
 
@@ -27,6 +37,7 @@
   (bt:with-lock-held (*main-thread-lock*)
     (unless *sdl3-initialized*
       (log:info :sdl3 "Initializing SDL3 video subsystem")
+      (%ensure-sdl-native-libs-loaded)
       (let ((result (sdl3-ffi:init sdl3-ffi:+init-video+)))
         (unless result
           (error 'sdl3-initialization-error
@@ -58,53 +69,43 @@
   (setf *executor-running* nil))
 
 (defun main-thread-executor-loop (&optional (event-callback nil))
-  "Run a loop on the main thread that processes SDL3 events and TMT tasks.
+  "DEPRECATED — use MAIN-THREAD-RUNNER with SDL3 phases instead.
 
-  Arguments:
-    event-callback - Optional function of (event-type result) called for
-                     each polled SDL3 event.
+  Retained for backward compatibility. Builds a runner with standard SDL3 phases
+  and runs it. EVENT-CALLBACK is ignored in the new implementation — define
+  HANDLE-SDL3-EVENT methods to handle specific event types.
 
-  This function takes over the current thread. It should be called
-  from the main thread. The loop continues until STOP-EXECUTOR is called."
-  (rs-internals:register-main-thread)
-  (rs-internals:assert-main-thread :executor-loop)
-  
-  (when *executor-running*
-    (error "Another main thread runner is already active."))
-  
-  (setf *executor-running* t
-        *executor-thread* (bt:current-thread))
-  
-  (rs-internals:ensure-tmt-runner-ready)
-  (log:info :sdl3 "Starting main thread executor loop")
-  
-  (unwind-protect
-       (progn
-         (init-sdl3-video)
-         (float-features:with-float-traps-masked
-             (:invalid :overflow :underflow :divide-by-zero :inexact)
-           (loop while *executor-running*
-                 do (rs-internals:process-tmt-tasks)
-                    (multiple-value-bind (count quit) (process-events event-callback)
-                      (declare (ignore count))
-                      (when quit (setf *executor-running* nil)))
-                    (sleep 0.001))))
-    (log:info :sdl3 "Main thread executor loop stopped")
-    (setf *executor-running* nil)))
+  Blocks the calling thread (must be main thread) until the runner stops."
+  (declare (ignore event-callback))
+  (log:info :sdl3 "main-thread-executor-loop: using new runner (event-callback ignored)")
+  (init-sdl3-video)
+  (let ((runner (make-instance 'rs-internals:main-thread-runner
+                               :phases (list (make-sdl-event-phase)
+                                             (make-sleep-yield-phase)))))
+    (setf rs-internals:*runner* runner
+          *executor-running* t
+          *executor-thread* (bt:current-thread))
+    (unwind-protect
+         (rs-internals:runner-run runner)
+      (setf *executor-running* nil
+            rs-internals:*runner* nil))))
 
 (defmacro with-main-thread-executor ((&key event-callback) &body body)
-  "Start the executor on the main thread and run BODY in a background thread.
+  "Start the SDL3 executor on the main thread and run BODY in a background thread.
 
-  This is a convenience macro for standalone applications."
-  `(let ((main-thread-error nil))
-     (bt:make-thread
-      (lambda ()
-        (handler-case
-            (progn ,@body)
-          (error (e)
-            (setf main-thread-error e)
-            (stop-executor))))
-      :name "Application Background Thread")
-     (main-thread-executor-loop ,event-callback)
-     (when main-thread-error
-       (error main-thread-error))))
+  This is a convenience macro for standalone applications.
+
+  Builds a MAIN-THREAD-RUNNER with the standard SDL3 phases:
+    1. :poll-sdl-events — drains SDL3 event queue (4ms budget)
+    2. :sleep-yield     — 1ms sleep to prevent busy-looping
+
+  If EVENT-CALLBACK is provided it is ignored (deprecated; use HANDLE-SDL3-EVENT
+  methods to handle events in the new phase-based model).
+
+  Sets RS-INTERNALS:*RUNNER* so that DEFINE-MAIN-THREAD-OP functions work
+  transparently from BODY's thread."
+  (declare (ignore event-callback))
+  `(rs-internals:with-runner
+       (runner :phases (list (make-sdl-event-phase) (make-sleep-yield-phase)))
+     (init-sdl3-video)
+     ,@body))

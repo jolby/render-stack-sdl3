@@ -17,6 +17,7 @@
   (:nicknames :rs-sdl3)
   (:local-nicknames (:a :alexandria)
                     (:bt :bordeaux-threads)
+                    (:bt2 :bordeaux-threads-2)
                     (:log :org.shirakumo.verbose)
                     (:rs-internals :render-stack-internals)
                     (:rs-host :render-stack-host)
@@ -71,9 +72,30 @@
    #:sdl3-initialized-p
    #:init-sdl3-video
    #:quit-sdl3
-   #:main-thread-executor-loop
-   #:stop-executor
-   #:with-main-thread-executor
+   #:main-thread-executor-loop        ; legacy — use runner phases instead
+   #:stop-executor                    ; legacy
+   #:with-main-thread-executor        ; legacy wrapper
+
+   ;; Runner phases
+   #:sdl-event-phase
+   #:make-sdl-event-phase
+   #:sdl-render-phase
+   #:make-sdl-render-phase
+   #:sleep-yield-phase
+   #:make-sleep-yield-phase
+   #:event-wait-yield-phase
+   #:make-event-wait-yield-phase
+
+   ;; Main-thread ops (cross-thread SDL3 operations)
+   #:make-sdl3-window
+   #:destroy-sdl3-window
+   #:set-sdl3-window-title
+   #:set-sdl3-window-size
+   #:set-sdl3-window-position
+   #:make-sdl3-gl-context
+   #:destroy-sdl3-gl-context
+   #:sdl3-gl-make-current
+   #:sdl3-gl-swap-window
    ;; Conditions
    #:sdl3-error
    #:sdl3-error-message
