@@ -17,7 +17,6 @@
   (:nicknames :rs-sdl3)
   (:local-nicknames (:a :alexandria)
                     (:bt :bordeaux-threads)
-                    (:bt2 :bordeaux-threads-2)
                     (:log :org.shirakumo.verbose)
                     (:rs-internals :render-stack-internals)
                     (:rs-host :render-stack-host)

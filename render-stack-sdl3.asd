@@ -8,7 +8,6 @@
                :render-stack-host
                :alexandria
                :bordeaux-threads
-               :bordeaux-threads-2
                :float-features)
   :components ((:module "src"
                 :components ((:file "package")
