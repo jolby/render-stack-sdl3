@@ -10,7 +10,7 @@
 (defvar *sdl3-initialized* nil
   "T if SDL3 has been initialized on the main thread.")
 
-(defvar *main-thread-lock* (bt2:make-lock "SDL3 main thread lock")
+(defvar *main-thread-lock* (bt2:make-lock :name "SDL3 main thread lock")
   "Lock for SDL3 main thread synchronization.")
 
 (defun sdl3-initialized-p ()
