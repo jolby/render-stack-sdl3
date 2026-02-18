@@ -10,7 +10,7 @@
 (defvar *sdl3-initialized* nil
   "T if SDL3 has been initialized on the main thread.")
 
-(defvar *main-thread-lock* (bt:make-lock "SDL3 main thread lock")
+(defvar *main-thread-lock* (bt2:make-lock "SDL3 main thread lock")
   "Lock for SDL3 main thread synchronization.")
 
 (defun sdl3-initialized-p ()
@@ -34,7 +34,7 @@
   Use this from main-thread-executor-loop or similar main-thread context.
   Safe to call multiple times (idempotent)."
   (rs-internals:assert-main-thread :init-sdl3-video)
-  (bt:with-lock-held (*main-thread-lock*)
+  (bt2:with-lock-held (*main-thread-lock*)
     (unless *sdl3-initialized*
       (log:info :sdl3 "Initializing SDL3 video subsystem")
       (%ensure-sdl-native-libs-loaded)
@@ -51,7 +51,7 @@
   Should be called when the application exits.
   Safe to call multiple times (idempotent)."
   (rs-internals:assert-main-thread :quit-sdl3)
-  (bt:with-lock-held (*main-thread-lock*)
+  (bt2:with-lock-held (*main-thread-lock*)
     (when *sdl3-initialized*
       (log:info :sdl3 "Shutting down SDL3")
       (sdl3-ffi:quit)
@@ -84,7 +84,7 @@
                                              (make-sleep-yield-phase)))))
     (setf rs-internals:*runner* runner
           *executor-running* t
-          *executor-thread* (bt:current-thread))
+          *executor-thread* (bt2:current-thread))
     (unwind-protect
          (rs-internals:runner-run runner)
       (setf *executor-running* nil
