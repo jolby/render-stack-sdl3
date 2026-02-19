@@ -197,7 +197,7 @@
   Example:
     (process-events
       (lambda (type result)
-        (log:debug \"Event ~A: ~A\" type result)))"
+        (log:debug :sdl3 \"Event ~A: ~A\" type result)))"
   (let ((count 0)
         (quit-requested nil))
     (with-sdl3-event (ev)
