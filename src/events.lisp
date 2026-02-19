@@ -87,7 +87,7 @@
   Example:
     (poll-all-events
       (lambda (ev type)
-        (log:debug \"Event: ~A\" type)))"
+        (log:debug :sdl3 \"Event: ~A\" type)))"
   (declare (type function handler-fn))
   (let ((count 0))
     (with-sdl3-event (ev)

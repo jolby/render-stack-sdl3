@@ -8,7 +8,7 @@ Idiomatic Common Lisp API built on [render-stack-sdl3-ffi](https://github.com/jo
 - Event polling and dispatch
 - Main-thread execution (via trivial-main-thread)
 - Window management
-- Structured logging via log4cl
+- Structured logging via verbose
 
 ## Dependencies
 
@@ -16,7 +16,7 @@ Idiomatic Common Lisp API built on [render-stack-sdl3-ffi](https://github.com/jo
 - alexandria
 - bordeaux-threads
 - trivial-main-thread
-- log4cl
+- verbose
 
 ## Usage
 
