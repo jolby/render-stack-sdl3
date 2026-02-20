@@ -95,6 +95,15 @@
    #:destroy-sdl3-gl-context
    #:sdl3-gl-make-current
    #:sdl3-gl-swap-window
+   #:show-sdl3-window
+   #:hide-sdl3-window
+   #:get-sdl3-display-bounds
+   #:get-sdl3-window-position
+   #:get-sdl3-window-geometry
+   #:center-sdl3-window
+   #:create-system-cursor
+   #:set-sdl3-cursor
+   #:destroy-sdl3-cursor
    ;; Conditions
    #:sdl3-error
    #:sdl3-error-message
