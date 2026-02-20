@@ -299,10 +299,15 @@
      NIL if timeout expired.
 
    Note: Uses OS-level blocking via SDL_WaitEventTimeout, not busy-waiting.
-   This is the recommended way to wait for events when not polling in a loop."
+   This is the recommended way to wait for events when not polling in a loop.
+
+   IMPORTANT: Passes a null pointer as the event argument so that SDL3
+   pumps events and checks for availability WITHOUT dequeuing the first
+   event.  If a non-null pointer were used, SDL3 would remove one event
+   from the queue into the local struct, which is then discarded when this
+   function returns — silently dropping a keystroke or other event."
   (declare (type (signed-byte 32) timeout-ms))
-  (with-sdl3-event (ev)
-    (%sdl3::wait-event-timeout ev timeout-ms)))
+  (%sdl3::wait-event-timeout (cffi:null-pointer) timeout-ms))
 
 (defun wait-event (event-ptr)
   "Wait indefinitely for an SDL3 event.
