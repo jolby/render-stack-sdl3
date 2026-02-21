@@ -13,7 +13,7 @@
 ;;; -----------------------------------------------------------------------
 
 (rs-internals:define-main-thread-op make-sdl3-window
-    (title width height &key (flags 0) x y)
+    (title width height &key (flags 0) (hidden t) x y)
   "Create an SDL3 window with an OpenGL context. Safe to call from any thread.
 Returns an SDL3-WINDOW instance.
 
@@ -22,12 +22,15 @@ Arguments:
   WIDTH  — window width in pixels
   HEIGHT — window height in pixels
   FLAGS  — additional SDL3 window flags (ORed with OPENGL + RESIZABLE)
+  HIDDEN — if T (default), create window hidden; caller must call show-sdl3-window
+           after the first frame is rendered (SDL3-recommended staged init pattern)
   X, Y   — initial window position (NIL = SDL default)
 
 Signals SDL3-ERROR if window or GL context creation fails."
   (rs-internals:assert-main-thread :make-sdl3-window)
   (let* ((actual-flags (logior sdl3-ffi:+window-opengl+
                                sdl3-ffi:+window-resizable+
+                               (if hidden sdl3-ffi:+window-hidden+ 0)
                                flags))
          (handle (sdl3-ffi:create-window title width height actual-flags)))
     (when (cffi:null-pointer-p handle)
