@@ -67,6 +67,9 @@
    #:handle-sdl3-event
    #:dispatch-event
    #:process-events
+   ;; Error / diagnostics
+   #:sdl3-get-error
+   #:sdl3-native-lib-loaded-p
    ;; Main thread support (SDL3 specific)
    #:sdl3-initialized-p
    #:init-sdl3-video

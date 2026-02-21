@@ -24,6 +24,10 @@
                                                  "src/lib/build/desktop/"))
   (:unix "libsdl3.clawed.so"))
 
+(defun sdl3-native-lib-loaded-p ()
+  "Return T if the SDL3 native library has been loaded via CFFI."
+  (cffi:foreign-library-loaded-p 'sdl3-clawed))
+
 (defun %ensure-sdl-native-libs-loaded ()
   (cffi:load-foreign-library 'sdl3-clawed))
 

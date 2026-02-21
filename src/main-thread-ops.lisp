@@ -9,6 +9,15 @@
 (in-package :render-stack-sdl3)
 
 ;;; -----------------------------------------------------------------------
+;;; Error reporting
+;;; -----------------------------------------------------------------------
+
+(defun sdl3-get-error ()
+  "Return the most recent SDL3 error message as a string.
+Wraps SDL_GetError. Safe to call from any thread."
+  (sdl3-ffi:get-error))
+
+;;; -----------------------------------------------------------------------
 ;;; Window management
 ;;; -----------------------------------------------------------------------
 
