@@ -55,9 +55,18 @@ It just blocks until either an event arrives or the timeout elapses."))
 
 (defmethod rs-internals:run-phase ((phase event-wait-yield-phase) runner)
   (declare (ignore runner))
-  ;; wait-event-timeout returns T if event available, NIL if timeout.
-  ;; Either way we just return — the sdl-event-phase will drain on next iter.
-  (wait-event-timeout (yield-phase-timeout-ms phase)))
+  ;; T1 DIAGNOSTIC: confirm whether SDL_WaitEventTimeout(NULL, 16) actually blocks.
+  ;; 42K/sec iteration rate strongly suggests it returns immediately regardless of timeout.
+  (let* ((t0         (get-internal-real-time))
+         (got-event  (wait-event-timeout (yield-phase-timeout-ms phase)))
+         (elapsed-ms (round (* 1000 (- (get-internal-real-time) t0))
+                            internal-time-units-per-second)))
+    (log:debug :event "wait-event-timeout: ~Dms got-event=~A" elapsed-ms got-event)
+    ;; T1 FIX: SDL3 WaitEventTimeout(NULL, N) appears to return immediately.
+    ;; Sleep the remainder so the loop runs at ~60fps instead of 42K/sec.
+    ;; This gives stable frame timing while we diagnose the black-window issue.
+    (when (< elapsed-ms 1)
+      (sleep 0.016))))
 
 (defun make-event-wait-yield-phase (&key (timeout-ms 16))
   "Create an EVENT-WAIT-YIELD-PHASE that waits up to TIMEOUT-MS for events.
